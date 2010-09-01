@@ -8,7 +8,7 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Starlight\Component\HTTP;
+namespace Starlight\Component\Http;
 
 
 /**
@@ -73,6 +73,7 @@ class ParameterBucket
     * Returns a parameter by name
     * @param string $key The key
     * @param mixed $default default value
+    * @return mixed value
     */
    public function get($key, $default = null)
    {
@@ -92,7 +93,7 @@ class ParameterBucket
    /**
     * Returns true if the parameter is defined
     * @param string $key The key
-    * @return Boolean true if the parameter exists, false otherwise
+    * @return boolean true if the parameter exists, false otherwise
     */
    public function has($key)
    {
