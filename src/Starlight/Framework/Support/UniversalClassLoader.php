@@ -124,8 +124,7 @@ class UniversalClassLoader
          $namespace = substr($class, 0, $pos);
          foreach ($this->namespaces as $ns => $dir) {
             if (strpos($namespace, $ns) === 0) {
-               $class = substr($class, $pos + 1);
-               $file = $dir . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $namespace) . DIRECTORY_SEPARATOR . str_replace('_', DIRECTORY_SEPARATOR, $class) . '.php';
+               $file = $dir . DIRECTORY_SEPARATOR . str_replace(array('\\', '_'), DIRECTORY_SEPARATOR, $class) . '.php';
                if (file_exists($file)) {
                   require $file;
                }
