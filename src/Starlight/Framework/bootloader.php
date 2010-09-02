@@ -28,5 +28,4 @@ $dispatcher = new \Starlight\Component\Dispatcher\HttpDispatcher();
 $dispatcher->dispatch(new \Starlight\Component\Http\Request());
 dump($dispatcher);
 
-
 //\Starlight\Framework\Kernel::initialize();

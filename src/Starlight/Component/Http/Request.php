@@ -216,28 +216,28 @@ class Request
     */
    public function getRemoteIp()
    {
-      // if ($this->remote_ip === null) {
-      //    $remote_ips = null;
-      //    if ($x_forward = $this->server->get('HTTP_X_FORWARDED_FOR')) {
-      //       $remote_ips = array_map('trim', explode(',', $x_forward));
-      //    }
-      // 
-      //    $client_ip = $this->server->get('HTTP_CLIENT_IP');
-      //    if ($client_ip) {
-      //       if (is_array($remote_ips) && !in_array($client_ip, $remote_ips)) {
-      //          // don't know which came from the proxy, and which from the user
+      if ($this->remote_ip === null) {
+         $remote_ips = null;
+         if ($x_forward = $this->server->get('HTTP_X_FORWARDED_FOR')) {
+            $remote_ips = array_map('trim', explode(',', $x_forward));
+         }
+      
+         $client_ip = $this->server->get('HTTP_CLIENT_IP');
+         if ($client_ip) {
+            if (is_array($remote_ips) && !in_array($client_ip, $remote_ips)) {
+               // don't know which came from the proxy, and which from the user
              throw new Exception\IpSpoofingException(sprintf("IP spoofing attack?!\nHTTP_CLIENT_IP=%s\nHTTP_X_FORWARDED_FOR=%s", $this->server->get('HTTP_CLIENT_IP'), $this->server->get('HTTP_X_FORWARDED_FOR')));
-      //       }
-      //    
-      //       $this->remote_ip = $client_ip;
-      //    } elseif (is_array($remote_ips)) {
-      //       $this->remote_ip = $remote_ips[0];
-      //    } else {
-      //       $this->remote_ip = $this->server->get('REMOTE_ADDR');
-      //    }
-      // }
-      // 
-      // return $this->remote_ip;
+            }
+         
+            $this->remote_ip = $client_ip;
+         } elseif (is_array($remote_ips)) {
+            $this->remote_ip = $remote_ips[0];
+         } else {
+            $this->remote_ip = $this->server->get('REMOTE_ADDR');
+         }
+      }
+      
+      return $this->remote_ip;
    }
    
    /**

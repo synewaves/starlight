@@ -192,7 +192,7 @@ class HeaderBucket
          'secure' => false,
          'http_only' => true,
       );
-      $options = array_merge($default_options, $options);
+      $options += $default_options;
       
       if (preg_match("/[=,; \t\r\n\013\014]/", $key)) {
          throw new \InvalidArgumentException(sprintf('The cookie name "%s" contains invalid characters.', $key));
