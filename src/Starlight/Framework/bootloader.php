@@ -8,11 +8,13 @@
  * with this source code in the file LICENSE.
  */
 
-require __DIR__ . DIRECTORY_SEPARATOR . 'Support' . DIRECTORY_SEPARATOR . 'UniversalClassLoader.php';
+error_reporting(-1);
+
+require_once __DIR__ . DIRECTORY_SEPARATOR . 'Support' . DIRECTORY_SEPARATOR . 'UniversalClassLoader.php';
 
 $autoloader = new \Starlight\Framework\Support\UniversalClassLoader();
 $autoloader->registerNamespaces(array(
-   'Starlight' => realpath(dirname(__FILE__) . '/../../'),
+   'Starlight' => __DIR__ . '/../../',
 ));
 $autoloader->register();
 
@@ -24,8 +26,26 @@ function dump()
    }
 }
 
-$dispatcher = new \Starlight\Component\Dispatcher\HttpDispatcher();
-$dispatcher->dispatch(new \Starlight\Component\Http\Request());
-dump($dispatcher);
+// $dispatcher = new \Starlight\Component\Dispatcher\HttpDispatcher();
+// $dispatcher->dispatch(new \Starlight\Component\Http\Request());
+// dump($dispatcher);
 
 //\Starlight\Framework\Kernel::initialize();
+
+// $r->match('/some/url/to/match', 'controller#hellyeah');
+
+// $route = \Starlight\Component\Routing\Router::match('/pages/*junk/anything/:id', 'pages#view')
+//    ->defaults(array('controller' => 'anything'))
+//    ->methods(array('post', 'get'))
+//    ->constraints(array('id' => '/[0-9]+/i'))
+//    ->name('junk_stuff')
+//    ->namespaced('admin')
+//    ;
+//    // ->constraints(function($request){
+//    //    return false;
+//    // });
+// $route = \Starlight\Component\Routing\Router::resources('photos')
+//    ->except(array('index'))
+//    ;
+// 
+// dump($route);

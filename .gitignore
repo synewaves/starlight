@@ -1,1 +1,4 @@
 .eprj
+phpunit.xml
+autoload.php
+coverage

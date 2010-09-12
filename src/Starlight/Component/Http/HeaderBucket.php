@@ -88,7 +88,7 @@ class HeaderBucket
     */
    public function get($key, $first = true)
    {
-      $key = self::normalizeHeaderName($key);
+      $key = static::normalizeHeaderName($key);
 
       if (!array_key_exists($key, $this->headers)) {
          return $first ? null : array();
@@ -109,7 +109,7 @@ class HeaderBucket
     */
    public function set($key, $values, $replace = true)
    {
-      $key = self::normalizeHeaderName($key);
+      $key = static::normalizeHeaderName($key);
 
       if (!is_array($values)) {
          $values = array($values);
@@ -129,7 +129,7 @@ class HeaderBucket
     */
    public function has($key)
    {
-      return array_key_exists(self::normalizeHeaderName($key), $this->headers);
+      return array_key_exists(static::normalizeHeaderName($key), $this->headers);
    }
 
    /**
@@ -149,7 +149,7 @@ class HeaderBucket
     */
    public function delete($key)
    {
-      unset($this->headers[self::normalizeHeaderName($key)]);
+      unset($this->headers[static::normalizeHeaderName($key)]);
    }
 
    // /**

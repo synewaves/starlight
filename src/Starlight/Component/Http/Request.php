@@ -174,7 +174,7 @@ class Request
     * Gets the server port
     * @return integer port
     */
-   public static function getPort()
+   public function getPort()
    {
       if ($this->port === null) {
          $this->port = $this->server->get('SERVER_PORT', $this->getStandardPort());
@@ -187,7 +187,7 @@ class Request
     * Gets the standard port number for the current protocol
     * @return integer port (443, 80)
     */
-   public static function getStandardPort()
+   public function getStandardPort()
    {
       return $this->isSsl() ? 443 : 80;
    }
