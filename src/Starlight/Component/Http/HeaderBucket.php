@@ -70,6 +70,7 @@ class HeaderBucket
    /**
     * Replaces the current HTTP headers by a new set
     * @param array $headers An array of HTTP headers
+    * @return HeaderBucket this instance
     */
    public function replace(array $headers = array())
    {
@@ -78,6 +79,8 @@ class HeaderBucket
       foreach ($headers as $key => $values) {
          $this->set($key, $values);
       }
+      
+      return $this;
    }
 
    /**
@@ -106,6 +109,7 @@ class HeaderBucket
     * @param string $key The key
     * @param string|array $values The value or an array of values
     * @param boolean $replace Whether to replace the actual value of not (true by default)
+    * @return HeaderBucket this instance
     */
    public function set($key, $values, $replace = true)
    {
@@ -120,6 +124,8 @@ class HeaderBucket
       } else {
          $this->headers[$key] = array_merge($this->headers[$key], $values);
       }
+      
+      return $this;
    }
 
    /**
@@ -146,10 +152,13 @@ class HeaderBucket
    /**
     * Deletes a header
     * @param string $key The HTTP header name
+    * @return HeaderBucket this instance
     */
    public function delete($key)
    {
       unset($this->headers[static::normalizeHeaderName($key)]);
+      
+      return $this;
    }
 
    // /**
@@ -182,6 +191,7 @@ class HeaderBucket
     * @param string $key cookie key
     * @param mixed $value value
     * @param array $options options hash (see above)
+    * @return HeaderBucket this instance
     */
    public function setCookie($name, $value, $options = array())
    {
@@ -244,12 +254,15 @@ class HeaderBucket
          $cookie .= '; httponly';
       }
       
-      $this->set('Set-Cookie', $cookie, false); 
+      $this->set('Set-Cookie', $cookie, false);
+      
+      return $this;
    }
    
    /**
     * Expire a cookie variable
     * @param string $key cookie key
+    * @return HeaderBucket this instance
     */
    public function expireCookie($key)
    {
@@ -268,6 +281,8 @@ class HeaderBucket
       $cookie = sprintf('%s=; expires=', $name, substr(\DateTime::createFromFormat('U', time() - 3600, new \DateTimeZone('UTC'))->format('D, d-M-Y H:i:s T'), 0, -5));
       
       $this->set('Set-Cookie', $cookie, false);
+      
+      return $this;
    }
 
    /**

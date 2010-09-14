@@ -9,11 +9,17 @@
  */
 
 namespace Starlight\Component\Dispatcher;
+use Starlight\Component\Dispatcher\Context\Context;
 
 
-class HttpDispatcher extends Dispatcher
+abstract class Dispatcher
 {
-   public function dispatch()
+   public $context;
+   
+   public function __construct(Context $context)
    {
+      $this->context = $context;
    }
+   
+   abstract public function dispatch();
 };

@@ -21,7 +21,7 @@ class Route implements Routable, Compilable
     * '\' and '.'
     * @var string
     */
-   protected static $separator_regex = '/([\/\.])/i';
+   protected static $separators = array('\/', '\.');
    
    /**
     * Base default values for route parameters
@@ -36,7 +36,6 @@ class Route implements Routable, Compilable
    
    public $path;
    public $endpoint;
-   public $patterns = array();
    public $regex;
    public $parameters;
    public $constraints;
@@ -52,38 +51,6 @@ class Route implements Routable, Compilable
    {
       $this->path = $path;
       $this->endpoint = $endpoint;
-      
-      // $elements = preg_split(static::$separator_regex, trim($this->path, '/'), -1, PREG_SPLIT_DELIM_CAPTURE);
-      // if (count($elements) == 0) {
-      //    return;
-      // }
-      // 
-      // array_unshift($elements, '/');
-      // $count = count($elements);
-      // $names = array();
-      // 
-      // for ($i=0; $i<$count; $i = $i+2) {
-      //    $sep = $elements[$i];
-      //    $elm = $elements[$i+1];
-      //    
-      //    if (preg_match('/^\*(.+)$/', $elm, $match)) {
-      //       // is the glob character:
-      //       $this->patterns[] = '(?:\\' . $sep . '(.*+))?';
-      //       $names[$match[1]] = null;
-      //    } elseif (preg_match('/^:(.+)$/', $elm, $match)) {
-      //       // is a named element:
-      //       $this->patterns[] = '(?:\\' . $sep . '([^\/\.]+))?';
-      //       $names[$match[1]] = null;
-      //    } else {
-      //       // just plain text:
-      //       $this->patterns[] = '\\' . $sep . $elm;
-      //    }
-      // }
-      // 
-      // // $this->regex = '/^' . implode($patterns) . '\/?$/i';
-      // $this->parameters = static::$base_defaults + $names;
-      // 
-      // list($this->parameters['controller'], $this->parameters['action']) = explode('#', $this->endpoint);
    }
    
    /**
@@ -130,20 +97,71 @@ class Route implements Routable, Compilable
       return $this;
    }
    
+   /**
+    *
+    */
    public function namespaced($namespace)
    {
       $this->namespace = $namespace;
-      // array_unshift($this->patterns, '\\/' . $namespace);
+      // 
       
       return $this;
    }
    
+   /**
+    *
+    */
    public function compile()
    {
+      $elements = preg_split('/([' . implode(static::$separators) . '])/i', trim($this->path, '/'), -1, PREG_SPLIT_DELIM_CAPTURE);
+      if (count($elements) == 0) {
+         return;
+      }
+      
+      array_unshift($elements, '/');
+      $patterns = array();
+      $count = count($elements);
+      $names = array();
+      
+      for ($i=0; $i<$count; $i = $i+2) {
+         $sep = $elements[$i];
+         $elm = $elements[$i+1];
+         
+         if (preg_match('/^\*(.+)$/', $elm, $match)) {
+            // glob character:
+            $patterns[] = '(?:\\' . $sep . '(.*+))?';
+            $names[$match[1]] = null;
+         } elseif (preg_match('/^:(.+)$/', $elm, $match)) {
+            // named element:
+            $patterns[] = '(?:\\' . $sep . '([^\/\.]+))?';
+            $names[$match[1]] = null;
+         } else {
+            // normal element:
+            $patterns[] = '\\' . $sep . $elm;
+         }
+      }
+      
+      if ($this->namespace) {
+         array_unshift($patterns, '\\/' . $this->namespace);
+         if ($this->name != '') {
+            $this->name = $this->namespace . '_' . $this->name;
+         }
+      }
+      
+      $this->regex = '/^' . implode($patterns) . '\/?$/i';
+      $this->parameters = static::$base_defaults + $names;
+      list($this->parameters['controller'], $this->parameters['action']) = explode('#', $this->endpoint);
+      
+      return $this;
    }
    
-   public function match($path)
+   /**
+    *
+    */
+   public function match($context)
    {
-      
+      // if (preg_match($this->regex, $path, $matches)) {
+      //    dump($matches);
+      // }
    }
 };

@@ -54,19 +54,25 @@ class ParameterBucket
    /**
     * Replaces the current parameters by a new set
     * @param array $parameters parameters
+    * @return HeaderBucket this instance
     */
    public function replace(array $parameters = array())
    {
       $this->parameters = $parameters;
+      
+      return $this;
    }
    
    /**
     * Adds parameters
     * @param array $parameters parameters
+    * @return HeaderBucket this instance
     */
    public function add(array $parameters = array())
    {
       $this->parameters = array_replace($this->parameters, $parameters);
+      
+      return $this;
    }
    
    /**
@@ -84,10 +90,13 @@ class ParameterBucket
     * Sets a parameter by name
     * @param string $key The key
     * @param mixed $value value
+    * @return HeaderBucket this instance
     */
    public function set($key, $value)
    {
       $this->parameters[$key] = $value;
+      
+      return $this;
    }
    
    /**
@@ -103,9 +112,12 @@ class ParameterBucket
    /**
     * Deletes a parameter
     * @param string $key key
+    * @return HeaderBucket this instance
     */
    public function delete($key)
    {
       unset($this->parameters[$key]);
+      
+      return $this;
    }
 };

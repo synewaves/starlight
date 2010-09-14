@@ -32,6 +32,12 @@ class Resource implements Compilable
       'destroy' => array('method' => 'delete', 'path' => '/:id'),
    );
    
+   protected static $resource_names = array(
+      'add'    => 'add',
+      'edit'   => 'edit',
+      'delete' => 'delete',
+   );
+   
    
    public $resource;
    public $except;
@@ -49,6 +55,7 @@ class Resource implements Compilable
    public function __construct($resource)
    {
       $this->resource = $resource;
+      $this->controller = $this->resource;
    }
    
    /**
@@ -58,8 +65,6 @@ class Resource implements Compilable
    {
       $this->only = null;
       $this->except = $except;
-      
-      // array_diff_key(static::$resources_map, array_fill_keys($except, true));
       
       return $this;
    }
@@ -71,8 +76,6 @@ class Resource implements Compilable
    {
       $this->except = null;
       $this->only = $only;
-      
-      // array_intersect_key(static::$resources_map, array_fill_keys($except, true));
       
       return $this;
    }
@@ -98,7 +101,7 @@ class Resource implements Compilable
    }
    
    /**
-    *
+    * (as)
     */
    public function name($name)
    {
@@ -123,5 +126,27 @@ class Resource implements Compilable
     */
    public function compile()
    {
+      $generators = self::$resources_map;
+      if ($this->except) {
+         $generators = array_diff_key($generators, array_fill_keys($this->except, true));
+      } elseif ($this->only) {
+         $generators = array_intersect_key($generators, array_fill_keys($this->only, true));
+      }
+      
+      $this->path_names += self::$resource_names;
+      
+      $routes = array();
+      foreach ($generators as $action => $parts) {
+         $path = $parts['path'];
+         if (strpos($path, ':action') !== false) {
+            $path = str_replace(':action', $this->path_names[$action], $path);
+         }
+         
+         $r = new Route('/' . $this->resource . $path, $this->controller . '#' . $action);
+         $r->methods(array($parts['method']))->name($this->name);
+         $routes[] = $r;
+      }
+      
+      dump($routes);
    }
 };

@@ -10,7 +10,7 @@
 
 error_reporting(-1);
 
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'Support' . DIRECTORY_SEPARATOR . 'UniversalClassLoader.php';
+require_once __DIR__ . '/Support/UniversalClassLoader.php';
 
 $autoloader = new \Starlight\Framework\Support\UniversalClassLoader();
 $autoloader->registerNamespaces(array(
@@ -26,6 +26,11 @@ function dump()
    }
 }
 
+
+$dispatcher = new \Starlight\Component\Dispatcher\HttpDispatcher(new \Starlight\Component\Http\HttpContext());
+$dispatcher->dispatch();
+
+
 // $dispatcher = new \Starlight\Component\Dispatcher\HttpDispatcher();
 // $dispatcher->dispatch(new \Starlight\Component\Http\Request());
 // dump($dispatcher);
@@ -34,18 +39,26 @@ function dump()
 
 // $r->match('/some/url/to/match', 'controller#hellyeah');
 
-// $route = \Starlight\Component\Routing\Router::match('/pages/*junk/anything/:id', 'pages#view')
-//    ->defaults(array('controller' => 'anything'))
-//    ->methods(array('post', 'get'))
-//    ->constraints(array('id' => '/[0-9]+/i'))
-//    ->name('junk_stuff')
-//    ->namespaced('admin')
+// $route = \Starlight\Component\Routing\Router::map('/pages/:id', 'pages#view')
+//    // ->defaults(array('controller' => 'anything'))
+//    // ->methods(array('post', 'get'))
+//    // ->constraints(array('id' => '/[0-9]+/i'))
+//    // ->name('junk_stuff')
+//    // ->namespaced('admin')
 //    ;
 //    // ->constraints(function($request){
 //    //    return false;
 //    // });
+
 // $route = \Starlight\Component\Routing\Router::resources('photos')
-//    ->except(array('index'))
+//    ->only(array('edit'))
+//    ->pathNames(array('edit' => 'editon'))
+//    ->controller('images')
+//    ->name('images')
 //    ;
 // 
-// dump($route);
+// $route->compile();
+
+// \Starlight\Component\Routing\Router::compile();
+// //\Starlight\Component\Routing\Router::match('/pages/this-is-some-junk/and-some-more-junk/adsf/anything/100asd');
+// \Starlight\Component\Routing\Router::match('/pages/100asd');
