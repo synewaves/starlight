@@ -81,7 +81,8 @@ class Request
     */
    public function getMethod()
    {
-      return strtolower($this->post->get('_method', $this->server->get('X_HTTP_METHOD_OVERRIDE', $this->server->get('REQUEST_METHOD'))));
+      $method = $this->post->get('_method', $this->server->get('X_HTTP_METHOD_OVERRIDE', $this->server->get('REQUEST_METHOD')));
+      return !is_null($method) ? strtolower($method) : null;
    }
    
    /**
@@ -156,12 +157,12 @@ class Request
     */
    public function getHost()
    {
-      if ($this->host === null) {
+      if (is_null($this->host)) {
          $host = $this->server->get('HTTP_X_FORWARDED_HOST', $this->server->get('HTTP_HOST'));
          $pos = strpos($host, ':');
          if ($pos !== false) {
             $this->host = substr($host, 0, $pos);
-            $this->port = $this->port === null ? substr($host, $pos + 1) : null;
+            $this->port = is_null($this->port) ? (int) substr($host, $pos + 1) : null;
          } else {
             $this->host = $host;
          }
@@ -176,8 +177,8 @@ class Request
     */
    public function getPort()
    {
-      if ($this->port === null) {
-         $this->port = $this->server->get('SERVER_PORT', $this->getStandardPort());
+      if (is_null($this->port)) {
+         $this->port = (int) $this->server->get('SERVER_PORT', $this->getStandardPort());
       }
       
       return $this->port;
@@ -216,7 +217,7 @@ class Request
     */
    public function getRemoteIp()
    {
-      if ($this->remote_ip === null) {
+      if (is_null($this->remote_ip)) {
          $remote_ips = null;
          if ($x_forward = $this->server->get('HTTP_X_FORWARDED_FOR')) {
             $remote_ips = array_map('trim', explode(',', $x_forward));

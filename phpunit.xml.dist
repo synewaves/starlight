@@ -11,15 +11,15 @@
          syntaxCheck="false"
          bootstrap="tests/bootstrap.php"
 >
-    <testsuites>
-        <testsuite name="Starlight Test Suite">
-            <directory>./tests/Starlight/</directory>
-        </testsuite>
-    </testsuites>
-
-    <filter>
-        <whitelist>
-            <directory>./src/Starlight/</directory>
-        </whitelist>
-    </filter>
+   <testsuites>
+      <testsuite name="Starlight Test Suite">
+         <directory>./tests/Starlight/</directory>
+      </testsuite>
+   </testsuites>
+   
+   <filter>
+      <whitelist>
+         <directory>./src/Starlight/</directory>
+      </whitelist>
+   </filter>
 </phpunit>

@@ -116,7 +116,9 @@ class ParameterBucket
     */
    public function delete($key)
    {
-      unset($this->parameters[$key]);
+      if ($this->has($key)) {
+         unset($this->parameters[$key]);
+      }
       
       return $this;
    }

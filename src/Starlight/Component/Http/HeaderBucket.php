@@ -156,7 +156,9 @@ class HeaderBucket
     */
    public function delete($key)
    {
-      unset($this->headers[static::normalizeHeaderName($key)]);
+      if ($this->has($key)) {
+         unset($this->headers[static::normalizeHeaderName($key)]);
+      }
       
       return $this;
    }
@@ -193,30 +195,30 @@ class HeaderBucket
     * @param array $options options hash (see above)
     * @return HeaderBucket this instance
     */
-   public function setCookie($name, $value, $options = array())
+   public function setCookie($key, $value, $options = array())
    {
       $default_options = array(
          'expires' => null,
-         'path' => '',
-         'domain' => '',
+         'path' => null,
+         'domain' => null,
          'secure' => false,
          'http_only' => true,
       );
       $options += $default_options;
       
       if (preg_match("/[=,; \t\r\n\013\014]/", $key)) {
-         throw new \InvalidArgumentException(sprintf('The cookie name "%s" contains invalid characters.', $key));
+         throw new \InvalidArgumentException(sprintf('The cookie key "%s" contains invalid characters.', $key));
       }
    
       if (preg_match("/[,; \t\r\n\013\014]/", $value)) {
          throw new \InvalidArgumentException(sprintf('The cookie value "%s" contains invalid characters.', $value));
       }
    
-      if (!$name) {
-         throw new \InvalidArgumentException('The cookie name cannot be empty');
+      if (trim($key) == '') {
+         throw new \InvalidArgumentException('The cookie key cannot be empty');
       }
       
-      $cookie = sprintf('%s=%s', $name, urlencode($value));
+      $cookie = sprintf('%s=%s', $key, urlencode($value));
       
       if ($this->type == 'request') {
          $this->set('Cookie', $cookie);
@@ -229,28 +231,28 @@ class HeaderBucket
          } elseif ($options['expires'] instanceof \DateTime) {
             $options['expires'] = $options['expires']->getTimestamp();
          } else {
-            $expires = strtotime($options['expires']);
-            if ($expires === false || $expires == -1) {
-               throw new \InvalidArgumentException(sprintf('The "expires" cookie parameter is not valid.', $expires));
+            $options['expires'] = strtotime($options['expires']);
+            if ($options['expires'] === false || $options['expires'] == -1) {
+               throw new \InvalidArgumentException(sprintf('The "expires" cookie parameter is not valid.', $options['expires']));
             }
          }
          
-         $cookie .= '; expires=' . substr(\DateTime::createFromFormat('U', $expires, new \DateTimeZone('UTC'))->format('D, d-M-Y H:i:s T'), 0, -5);
+         $cookie .= '; expires=' . substr(\DateTime::createFromFormat('U', $options['expires'], new \DateTimeZone('UTC'))->format('D, d-M-Y H:i:s T'), 0, -5);
       }
       
       if ($options['domain']) {
          $cookie .= '; domain=' . $options['domain'];
       }
       
-      if ($options['path'] !== '/') {
-         $cookie .= '; path=' . $path;
+      if ($options['path'] && $options['path'] !== '/') {
+         $cookie .= '; path=' . $options['path'];
       }
       
       if ($options['secure']) {
          $cookie .= '; secure';
       }
       
-      if ($options['httponly']) {
+      if ($options['http_only']) {
          $cookie .= '; httponly';
       }
       
@@ -266,19 +268,19 @@ class HeaderBucket
     */
    public function expireCookie($key)
    {
-      if ($this->type == 'request') {
-         return;
-      }
-
       if (preg_match("/[=,; \t\r\n\013\014]/", $key)) {
          throw new \InvalidArgumentException(sprintf('The cookie name "%s" contains invalid characters.', $key));
       }
       
-      if (!$name) {
+      if (!$key) {
          throw new \InvalidArgumentException('The cookie name cannot be empty');
       }
+
+      if ($this->type == 'request') {
+         return;
+      }
       
-      $cookie = sprintf('%s=; expires=', $name, substr(\DateTime::createFromFormat('U', time() - 3600, new \DateTimeZone('UTC'))->format('D, d-M-Y H:i:s T'), 0, -5));
+      $cookie = sprintf('%s=; expires=', $key, substr(\DateTime::createFromFormat('U', time() - 3600, new \DateTimeZone('UTC'))->format('D, d-M-Y H:i:s T'), 0, -5));
       
       $this->set('Set-Cookie', $cookie, false);
       
