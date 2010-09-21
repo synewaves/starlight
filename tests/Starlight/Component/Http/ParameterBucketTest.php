@@ -94,6 +94,29 @@ class ParameterBucketTest extends \PHPUnit_Framework_TestCase
       $this->assertFalse($bucket->has('test_4'));
    }
    
+   public function testArrayAccess()
+   {
+      $bucket = $this->getBucket();
+      
+      $this->assertTrue(isset($bucket['test_1']));
+      $this->assertEquals($bucket['test_1'], 'value_1');
+      
+      $bucket['test_4'] = 'anything';
+      $this->assertTrue(isset($bucket['test_4']));
+      
+      unset($bucket['test_4']);
+      $this->assertFalse(isset($bucket['test_4']));
+   }
+   
+   public function testIteratorAggreate()
+   {
+      $bucket = $this->getBucket();
+      
+      foreach ($bucket as $key => $value) {
+         $this->assertEquals($value, $this->params[$key]);
+      }
+   }
+   
    protected function getBucket()
    {
       return new ParameterBucket($this->params);

@@ -13,7 +13,7 @@ use Starlight\Component\Inflector\Inflector;
 
 
 /**
- * Route
+ * Resource
  */
 class Resource implements Compilable
 {
@@ -22,14 +22,14 @@ class Resource implements Compilable
     * @var array
     */
    protected static $resources_map = array(
-      'index'   => array('method' => 'get',    'path' => '/'),
-      'add'     => array('method' => 'get',    'path' => '/:action'),
-      'create'  => array('method' => 'post',   'path' => '/'),
-      'show'    => array('method' => 'get',    'path' => '/:id'),
-      'edit'    => array('method' => 'get',    'path' => '/:id/:action'),
-      'update'  => array('method' => 'put',    'path' => '/:id'),
-      'delete'  => array('method' => 'get',    'path' => '/:id/:action'),
-      'destroy' => array('method' => 'delete', 'path' => '/:id'),
+      'index'   => array('name' => '%p',        'verb' => 'get',    'url' => '/'),
+      'add'     => array('name' => 'add_%s',    'verb' => 'get',    'url' => '/:action'),
+      'create'  => array('name' => '%p',        'verb' => 'post',   'url' => '/'),
+      'show'    => array('name' => '%s',        'verb' => 'get',    'url' => '/:id'),
+      'edit'    => array('name' => 'edit_%s',   'verb' => 'get',    'url' => '/:id/:action'),
+      'update'  => array('name' => '%s',        'verb' => 'put',    'url' => '/:id'),
+      'delete'  => array('name' => 'delete_%s', 'verb' => 'get',    'url' => '/:id/:action'),
+      'destroy' => array('name' => '%s',        'verb' => 'delete', 'url' => '/:id'),
    );
    
    protected static $resource_names = array(
@@ -46,6 +46,7 @@ class Resource implements Compilable
    public $constraints;
    public $name;
    public $path_names;
+   public $namespace;
    // member, collection, resources (nested)
    
    
@@ -55,7 +56,7 @@ class Resource implements Compilable
    public function __construct($resource)
    {
       $this->resource = $resource;
-      $this->controller = $this->resource;
+      $this->controller = Inflector::pluralize($this->resource);
    }
    
    /**
@@ -105,7 +106,17 @@ class Resource implements Compilable
     */
    public function name($name)
    {
-      $this->name = $name;
+      $single = explode(' ', strtolower(Inflector::humanize($name)));
+      $plural = $single;
+      $count = count($single);
+      
+      $single[$count - 1] = Inflector::singularize($single[$count - 1]);
+      $plural[$count - 1] = Inflector::pluralize($plural[$count - 1]);
+      
+      $this->name = array(
+         implode('_', $single),
+         implode('_', $plural),
+      );
       
       return $this;
    }
@@ -120,33 +131,62 @@ class Resource implements Compilable
       return $this;
    }
    
+   /**
+    *
+    */
+   public function namespaced($namespace)
+   {
+      $this->namespace = $namespace;
+      
+      return $this;
+   }
    
    /**
     *
     */
    public function compile()
    {
-      $generators = self::$resources_map;
+      $generators = static::$resources_map;
       if ($this->except) {
          $generators = array_diff_key($generators, array_fill_keys($this->except, true));
       } elseif ($this->only) {
          $generators = array_intersect_key($generators, array_fill_keys($this->only, true));
       }
       
-      $this->path_names += self::$resource_names;
+      if (is_array($this->path_names)) {
+         $this->path_names += static::$resource_names;
+      } else {
+         $this->path_names = static::$resource_names;
+      }
       
       $routes = array();
       foreach ($generators as $action => $parts) {
-         $path = $parts['path'];
+         $path = $parts['url'];
          if (strpos($path, ':action') !== false) {
             $path = str_replace(':action', $this->path_names[$action], $path);
          }
          
          $r = new Route('/' . $this->resource . $path, $this->controller . '#' . $action);
-         $r->methods(array($parts['method']))->name($this->name);
-         $routes[] = $r;
+         $r->methods(array($parts['verb']));
+         
+         $single = isset($this->name[0]) ? $this->name[0] : Inflector::singularize($this->resource);
+         $plural = isset($this->name[1]) ? $this->name[1] : Inflector::pluralize($this->resource);
+         
+         $name = str_replace('%s', $single, $parts['name']);
+         $name = str_replace('%p', $plural, $name);
+         $r->name($name);
+         
+         if ($this->constraints) {
+            $r->constraints($this->constraints);
+         }
+         
+         if ($this->namespace) {
+            $r->namespaced($this->namespace);
+         }
+         
+         $routes[] = $r->compile();
       }
-      
-      dump($routes);
+
+      return $routes;
    }
 };

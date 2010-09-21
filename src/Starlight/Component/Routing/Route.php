@@ -9,6 +9,7 @@
  */
 
 namespace Starlight\Component\Routing;
+use Starlight\Component\Http\Request;
 
 
 /**
@@ -16,13 +17,6 @@ namespace Starlight\Component\Routing;
  */
 class Route implements Routable, Compilable
 {
-   /**
-    * URL path separators regex
-    * '\' and '.'
-    * @var string
-    */
-   protected static $separators = array('\/', '\.');
-   
    /**
     * Base default values for route parameters
     * @var array
@@ -49,7 +43,7 @@ class Route implements Routable, Compilable
     */
    public function __construct($path, $endpoint)
    {
-      $this->path = $path;
+      $this->path = static::normalize($path);
       $this->endpoint = $endpoint;
    }
    
@@ -103,7 +97,6 @@ class Route implements Routable, Compilable
    public function namespaced($namespace)
    {
       $this->namespace = $namespace;
-      // 
       
       return $this;
    }
@@ -113,43 +106,19 @@ class Route implements Routable, Compilable
     */
    public function compile()
    {
-      $elements = preg_split('/([' . implode(static::$separators) . '])/i', trim($this->path, '/'), -1, PREG_SPLIT_DELIM_CAPTURE);
-      if (count($elements) == 0) {
-         return;
-      }
-      
-      array_unshift($elements, '/');
-      $patterns = array();
-      $count = count($elements);
-      $names = array();
-      
-      for ($i=0; $i<$count; $i = $i+2) {
-         $sep = $elements[$i];
-         $elm = $elements[$i+1];
-         
-         if (preg_match('/^\*(.+)$/', $elm, $match)) {
-            // glob character:
-            $patterns[] = '(?:\\' . $sep . '(.*+))?';
-            $names[$match[1]] = null;
-         } elseif (preg_match('/^:(.+)$/', $elm, $match)) {
-            // named element:
-            $patterns[] = '(?:\\' . $sep . '([^\/\.]+))?';
-            $names[$match[1]] = null;
-         } else {
-            // normal element:
-            $patterns[] = '\\' . $sep . $elm;
-         }
-      }
+      $parser = new RouteParser();
+      $constraints = !is_callable($this->constraints) ? (array) $this->constraints : array();
       
       if ($this->namespace) {
-         array_unshift($patterns, '\\/' . $this->namespace);
+         $this->path = '/' . $this->namespace . $this->path;
          if ($this->name != '') {
             $this->name = $this->namespace . '_' . $this->name;
          }
+         $this->endpoint = $this->namespace . '/' . $this->endpoint;
       }
       
-      $this->regex = '/^' . implode($patterns) . '\/?$/i';
-      $this->parameters = static::$base_defaults + $names;
+      $this->regex = $parser->parse($this->path, $constraints);
+      $this->parameters = array_merge(static::$base_defaults, array_fill_keys($parser->names, ''), (array) $this->parameters);
       list($this->parameters['controller'], $this->parameters['action']) = explode('#', $this->endpoint);
       
       return $this;
@@ -158,10 +127,18 @@ class Route implements Routable, Compilable
    /**
     *
     */
-   public function match($context)
+   public function match(Request $request)
    {
-      // if (preg_match($this->regex, $path, $matches)) {
-      //    dump($matches);
-      // }
+   }
+   
+   /**
+    *
+    */
+   protected function normalize($path)
+   {
+      $path = trim($path, '/');
+      $path = '/' . $path;
+      
+      return $path;
    }
 };

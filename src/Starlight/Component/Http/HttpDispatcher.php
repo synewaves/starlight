@@ -8,12 +8,14 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Starlight\Component\Dispatcher;
+namespace Starlight\Component\Http;
+use Starlight\Component\Dispatcher\Dispatcher;
 
 
 class HttpDispatcher extends Dispatcher
 {
    public function dispatch()
    {
+      dump($this->context->request);
    }
 };

@@ -279,6 +279,29 @@ class HeaderBucketTest extends \PHPUnit_Framework_TestCase
       $this->assertNull($bucket->get('Set-Cookie'));
    }
    
+   public function testArrayAccess()
+   {
+      $bucket = $this->getBucket();
+      
+      $this->assertTrue(isset($bucket['HTTP_HOST']));
+      $this->assertEquals($bucket['HTTP_HOST'], 'localhost:80');
+      
+      $bucket['MADE_UP'] = 'anything';
+      $this->assertTrue(isset($bucket['MADE_UP']));
+      
+      unset($bucket['MADE_UP']);
+      $this->assertFalse(isset($bucket['MADE_UP']));
+   }
+   
+   public function testIteratorAggreate()
+   {
+      $bucket = $this->getBucket();
+      
+      foreach ($bucket as $key => $value) {
+         $this->assertEquals($value, $this->normalized_headers[$key]);
+      }
+   }
+   
    public function testNormalizeHeaderName()
    {
       $this->assertEquals(HeaderBucket::normalizeHeaderName('HTTP_HOST'), 'http-host');

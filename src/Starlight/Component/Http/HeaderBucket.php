@@ -14,7 +14,7 @@ namespace Starlight\Component\Http;
 /**
  * Wrapper class for request/response headers
  */
-class HeaderBucket
+class HeaderBucket implements \ArrayAccess, \IteratorAggregate
 {
    /**
     * Headers
@@ -285,6 +285,39 @@ class HeaderBucket
       $this->set('Set-Cookie', $cookie, false);
       
       return $this;
+   }
+   
+   //
+   // ArrayAccess
+   //
+   
+   public function offsetExists($offset)
+   {
+      return $this->has($offset);
+   }
+   
+   public function offsetGet($offset)
+   {
+      return $this->get($offset);
+   }
+   
+   public function offsetSet($offset, $value)
+   {
+      return $this->set($offset, $value);
+   }
+   
+   public function offsetUnset($offset)
+   {
+      return $this->delete($offset);
+   }
+   
+   //
+   // IteratorAggregate
+   //
+   
+   public function getIterator()
+   {
+      return new \ArrayIterator($this->all());
    }
 
    /**

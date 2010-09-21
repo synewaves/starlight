@@ -15,6 +15,8 @@ namespace Starlight\Component\Http;
  */
 class Request
 {
+   public static $local_ips = array('127.0.0.1');
+   
    public $post;
    public $get;
    public $cookies;
@@ -25,6 +27,7 @@ class Request
    protected $host;
    protected $port;
    protected $remote_ip;
+   protected $url;
    
    
    /**
@@ -242,6 +245,15 @@ class Request
    }
    
    /**
+    * Is this request local?
+    * @return boolean local
+    */
+   public function isLocal()
+   {
+      return in_array($this->getRemoteIp(), static::$local_ips);
+   }
+   
+   /**
     * Check if the request is an XMLHttpRequest (AJAX)
     * @return boolean is XHR (AJAX) request
     */
@@ -257,6 +269,32 @@ class Request
    public function getServer()
    {
       return $this->getProtocol() . $this->getHostWithPort();
+   }
+   
+   /**
+    * Gets the requested URI path without domain or script name
+    * @return string uri
+    */
+   public function getUri()
+   {
+      $url = $this->server->get('REQUEST_URI');
+      return trim($url) != '' ? $url : '/';
+   }
+   
+   /**
+    * Gets the requested route from the URI
+    * @return string route
+    */
+   public function getRoute()
+   {
+      $route = $this->getUri();
+      
+      // remove query string
+      if (($qs = strpos($route, '?')) !== false) {
+         $route = substr($route, 0, $qs);
+      }
+      
+      return $route;
    }
    
    /**

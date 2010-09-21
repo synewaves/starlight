@@ -246,6 +246,50 @@ class RequestTest extends \PHPUnit_Framework_TestCase
       $this->assertEquals($this->getRequest()->getServer(), 'https://example.com:8080');
    }
    
+   public function testGetUri()
+   {
+      $this->server['REQUEST_URI'] = '/src/Starlight/Framework/bootloader.php';
+      $this->assertEquals($this->getRequest()->getUri(), '/src/Starlight/Framework/bootloader.php');
+      
+      $this->server['REQUEST_URI'] = '';
+      $this->assertEquals($this->getRequest()->getUri(), '/');
+   }
+   
+   public function testGetRoute()
+   {
+      $this->server['REQUEST_URI'] = '/photos/1/users';
+      $this->assertEquals($this->getRequest()->getRoute(), '/photos/1/users');
+      
+      $this->server['REQUEST_URI'] = '/photos/1/users?querystring=1';
+      $this->assertEquals($this->getRequest()->getRoute(), '/photos/1/users');
+      
+      $this->server['REQUEST_URI'] = '';
+      $this->assertEquals($this->getRequest()->getRoute(), '/');
+   }
+   
+   public function testIsLocalStandard()
+   {
+      $this->server['REMOTE_ADDR'] = '127.0.0.1';
+      $this->assertTrue($this->getRequest()->isLocal());
+      
+      $this->server['REMOTE_ADDR'] = '127.0.0.2';
+      $this->assertFalse($this->getRequest()->isLocal());
+   }
+   
+   public function testIsLocalCustom()
+   {
+      Request::$local_ips[] = '192.168.0.1';
+      
+      $this->server['REMOTE_ADDR'] = '127.0.0.1';
+      $this->assertTrue($this->getRequest()->isLocal());
+      
+      $this->server['REMOTE_ADDR'] = '192.168.0.1';
+      $this->assertTrue($this->getRequest()->isLocal());
+      
+      $this->server['REMOTE_ADDR'] = '127.0.0.2';
+      $this->assertFalse($this->getRequest()->isLocal());
+   }
+   
    
    protected function getRequest()
    {

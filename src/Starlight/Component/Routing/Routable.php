@@ -9,6 +9,7 @@
  */
 
 namespace Starlight\Component\Routing;
+use Starlight\Component\Http\Request;
 
 
 /**
@@ -16,5 +17,5 @@ namespace Starlight\Component\Routing;
  */
 interface Routable
 {
-   public function match($path);
+   public function match(Request $request);
 };

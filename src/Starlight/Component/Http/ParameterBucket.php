@@ -15,7 +15,7 @@ namespace Starlight\Component\Http;
  * Wrapper class request parameters
  * @see Request
  */
-class ParameterBucket
+class ParameterBucket implements \ArrayAccess, \IteratorAggregate
 {
    /**
     * Parameters
@@ -121,5 +121,38 @@ class ParameterBucket
       }
       
       return $this;
+   }
+   
+   //
+   // ArrayAccess
+   //
+   
+   public function offsetExists($offset)
+   {
+      return $this->has($offset);
+   }
+   
+   public function offsetGet($offset)
+   {
+      return $this->get($offset);
+   }
+   
+   public function offsetSet($offset, $value)
+   {
+      return $this->set($offset, $value);
+   }
+   
+   public function offsetUnset($offset)
+   {
+      return $this->delete($offset);
+   }
+   
+   //
+   // IteratorAggregate
+   //
+   
+   public function getIterator()
+   {
+      return new \ArrayIterator($this->all());
    }
 };
