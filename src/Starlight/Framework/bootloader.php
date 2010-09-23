@@ -29,39 +29,47 @@ function dump()
 }
 
 
-// $context = new \Starlight\Component\Http\HttpContext();
-// $dispatcher = new \Starlight\Component\Http\HttpDispatcher($context);
-// $dispatcher->dispatch();
+// // $context = new \Starlight\Component\Http\HttpContext();
+// // $dispatcher = new \Starlight\Component\Http\HttpDispatcher($context);
+// // $dispatcher->dispatch();
+// 
+// $router = new \Starlight\Component\Routing\Router();
+// $router->draw(function($r){
+//    // $r->map('/:controller(/:action(/:id))(.:format)', 'session#add');
+//    // $r->map(':controller/:id', 'session#add')->constraints(array('id' => '[0-9]+'))->namespaced('admin');
+//    // $r->map('*anything', 'session#add');
+//    // $r->map('/login/:screenname', 'session#add')
+//    // ->defaults(array('id' => 27))
+//    // ->methods(array('get', 'post', 'delete'))
+//    // ->name('login')
+//    // ->namespaced('admin')
+//    // ->constraints(array('id' => '/27/i'))
+//    // ;
+//    
+//    // $r->constraints(array('id' => 27), function($r){
+//    //    $r->namespaced('admin', function($r){
+//    //       // $r->map('/login', 'session#new');
+//    //       // $r->map('/logout', 'session#destroy');
+//    //       $r->namespaced('anything', function($r){
+//    //          $r->map('whee', 'session#new');
+//    //       });
+//    //    });
+//    // });
+//    
+//    $r->resources('photo')
+//    ->name('image')
+//    ->controller('images')
+//    ->namespaced('admin')
+//    ;
+// });
+// $router->compile();
+// 
+// dump($router);
 
-$router = new \Starlight\Component\Routing\Router();
-$router->draw(function($r){
-   // $r->map('/:controller(/:action(/:id))(.:format)', 'session#add');
-   // $r->map(':controller/:id', 'session#add')->constraints(array('id' => '[0-9]+'))->namespaced('admin');
-   // $r->map('*anything', 'session#add');
-   // $r->map('/login/:screenname', 'session#add')
-   // ->defaults(array('id' => 27))
-   // ->methods(array('get', 'post', 'delete'))
-   // ->name('login')
-   // ->namespaced('admin')
-   // ->constraints(array('id' => '/27/i'))
-   // ;
-   
-   // $r->constraints(array('id' => 27), function($r){
-   //    $r->namespaced('admin', function($r){
-   //       // $r->map('/login', 'session#new');
-   //       // $r->map('/logout', 'session#destroy');
-   //       $r->namespaced('anything', function($r){
-   //          $r->map('whee', 'session#new');
-   //       });
-   //    });
-   // });
-   
-   $r->resources('photo')
-   ->name('image')
-   ->controller('images')
-   ->namespaced('admin')
-   ;
-});
-$router->compile();
-
-dump($router);
+$parser = new Starlight\Component\Routing\RouteParser();
+// $parser->parse('/foo(/bar))');
+$parser->parse('/foo/bar)');
+// $parser->parse('/foo(/bar(/:format)/download)');
+// dump($parser->parse('/foo(/bar)(/baz)'));
+// dump($parser->parse('/foo.:format'));
+// dump($parser->parse('/foo/bar'));
