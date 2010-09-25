@@ -67,9 +67,10 @@ function dump()
 // dump($router);
 
 $parser = new Starlight\Component\Routing\RouteParser();
+// $parser->parse('foo/bar');
 // $parser->parse('/foo(/bar))');
-$parser->parse('/foo/bar)');
+// $parser->parse('/foo/bar)');
 // $parser->parse('/foo(/bar(/:format)/download)');
-// dump($parser->parse('/foo(/bar)(/baz)'));
-// dump($parser->parse('/foo.:format'));
-// dump($parser->parse('/foo/bar'));
+$parser->parse('/\\foo\\((/:bar)(/baz)');
+// $parser->parse('/foo.:format');
+// $parser->parse('/foo/bar');

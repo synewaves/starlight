@@ -30,6 +30,7 @@ class RouteParser
    public $names = array();
    protected $quoted_separators;
    
+   
    /**
     *
     */
@@ -41,174 +42,102 @@ class RouteParser
       $this->separators = count($separators) > 0 ? $separators : static::$default_separators;
       $this->quoted_separators = $this->quote(implode('', $this->separators));
       
-      $this->segments = $this->reduce($this->path);
-      $this->regex = '/\A' . $this->expand($this->segments) . '\Z/';
+      $this->regex = $this->reduce();
       
       return $this->regex;
    }
    
-   protected function reduce($path)
+   /**
+    *
+    */
+   protected function reduce()
    {
+      $balance = 0;
+      $prev = $next = $literal = '';
+      $length = strlen($this->path);
       $segments = array();
       
-      $start = 0;
-      $length = strlen($path);
-      
-      $open = strpos($path, '(');
-      $close = $last_close = $last_open = -1;
-      
-      // if (($open !== false && $close_test === false) || ($open === false && $close_test !== false)) {
-      //    // something is unbalanced:
-      //    throw new \InvalidArgumentException('Optional segment parenthesis are unbalanced.');
-      // }
-      
-      // if ($open === false) {
-      //    // check for unbalanced-ness:
-      //    $c = $this->findMatchingParen(0, $path);
-      //    if ($close !== false) {
-      //       throw new \InvalidArgumentException('Optional segment parenthesis are unbalanced.');
-      //    }
-      //    
-      //    $segments[] = $path;
-      // } elseif ($start != $open) {
-      //    $segments[] = substr($path, $start, $open);
-      // }
-      
-      // while ($open !== false && $open <= $end) {
-      //    if (($close = $this->findMatchingParen($open, $path)) !== false) {
-      //       $segment = array(
-      //          'content_before' => '',
-      //          'content_after' => '',
-      //          'children' => array(),
-      //       );
-      //       
-      //       $segment_content = substr($path, $open + 1, $close - $open - 1);
-      //       $segment_inner_paren_open = strpos($segment_content, '(', 0);
-      //       if ($segment_inner_paren_open !== false) {
-      //          $segment_inner_paren_close = $this->findMatchingParen($segment_inner_paren_open, $segment_content);
-      //          if ($segment_inner_paren_close !== false) {
-      //             $segment['content_before'] = substr($segment_content, 0, $segment_inner_paren_open);
-      //             $segment['content_after'] = substr($segment_content, $segment_inner_paren_close + 1);
-      //             $segment['children'] = $this->reduce(substr($segment_content, $segment_inner_paren_open, strlen($segment_content) - $segment_inner_paren_close - 1));
-      //          } else {
-      //             throw new \InvalidArgumentException('Optional segment parenthesis are unbalanced.');
-      //          }
-      //       } else {
-      //          $segment['content_before'] = $segment_content;
-      //       }
-      //       
-      //       $segments[] = $segment;
-      //       $last_open = $open;
-      //       $last_close = $close;
-      //       $open = strpos($path, '(', $close + 1);
-      //    } else {
-      //       throw new \InvalidArgumentException('Optional segment parenthesis are unbalanced.');
-      //    }
-      // }
-
-      return $segments;
-   }
-   
-   
-   protected function findMatchingParen($open, $path)
-   {
-      $close = false;
-      $balance = -1;
-      $len = strlen($path);
-      
-      for ($i=$open+1; $i<$len; $i++) {
-         $char = $path{$i};
-         if ('(' == $char) {
-            $balance -= 1;
-         }
-         if (')' == $char) {
-            $balance += 1;
-         }
-         if (0 == $balance) {
-            $close = $i;
-            $i = $len;
-         }
-      }
-      
-      return $close;
-   }
-   
-   
-   protected function expand($segments)
-   {
-      dump($this->path);
-      dump($segments); die;
-      
-      $regex = '';
-      
-      foreach ($segments as $segment) {
-         if (is_array($segment)) {
-            $regex .= '(?:';
-            $regex .= $this->parseSegmentPart($segment['content_before']);
-            $regex .= $this->expand($segment['children']);
-            $regex .= $this->parseSegmentPart($segment['content_after']);
-            $regex .= ')?';
-         } else {
-            $regex .= $this->parseSegmentPart($segment);
-         }
-      }
-      
-      return $regex;
-   }
-
-   
-   protected function parseSegmentPart($path)
-   {
-      $parsed = '';
-      
-      preg_match_all('/((\:|\*){1}[a-z\_]+)/i', $path, $matches, PREG_OFFSET_CAPTURE);
-      if (isset($matches[0]) && count($matches[0]) > 0) {
+      for ($i=0; $i<$length; $i++)
+      {
+         $curr = $this->path[$i];
+         $next = isset($this->path[$i + 1]) ? $this->path[$i + 1] : '';
+         $prev = ($i > 0) ? $this->path[$i - 1] : '';
          
-         $t_regex = '';
-         $t_offset = 0;
-      
-         foreach ($matches[0] as $segment) {
-            list($key, $offset) = $segment;
-            
-            if (($offset > 0 && substr($path, $offset - 1, 1) == '\\')) {
-               $t_regex .= $this->quote(substr($path, $t_offset, $offset - $t_offset - 1));
-               $t_regex .= '\\' . substr($path, $offset, 1);
-               $t_regex .= $this->quote(substr($path, $offset + 1, strlen($key) - 1));
+         if ($curr == '\\') {
+            if (preg_match('/[\(|\)|\:|\*]/', $next)) {
+               // escaped special character
+               $i++;
+               $literal .= $next;
             } else {
-               $t_regex .= $this->quote(substr($path, $t_offset, $offset - $t_offset));
-               
-               $identifier = substr($key, 0, 1);
-               $name = substr($key, 1);
-               
-               $regex = '';
-               if (isset($this->requirements[$name])) {
-                  // custom requirements
-                  $regex = $this->requirements[$name];
-               } elseif ($identifier == '*') {
-                  // glob character
-                  $regex = '.+';
-               } else {
-                  // standard segment
-                  $regex = '[^' . $this->quoted_separators . ']+';
+               // literal
+               $literal .= $curr;
+            }
+         } else {
+            if (preg_match('/[\(|\)]/', $curr)) {
+               // parenthesis
+               if ($literal != '') {
+                  $segments[] = $this->quote($literal);
+                  $literal = '';  
                }
                
-               $t_regex .= '(?<' . $name . '>' . $regex . ')';
-               $this->names[] = $name;
+               if ($curr == '(') {
+                  $balance += 1;
+                  $segments[] = '(?:';
+               } else {
+                  $balance -= 1;
+                  $segments[] = ')?';
+               }
+            } elseif (preg_match('/[\:|\*]/', $curr)) {
+               // identifier
+               preg_match('/(\:|\*){1}[a-z\_]+/i', $this->path, $matches, PREG_OFFSET_CAPTURE, $i);
+               if (isset($matches[0]) && count($matches[0]) > 0) {
+                  if ($literal != '') {
+                     $segments[] = $this->quote($literal);
+                     $literal = '';
+                  }
+                  
+                  $id = substr($matches[0][0], 0, 1);
+                  $key = substr($matches[0][0], 1);
+                  
+                  if (isset($this->requirements[$key])) {
+                     // custom requirements
+                     $regex = $this->requirements[$key];
+                  } elseif ($id == '*') {
+                     // glob
+                     $regex = '.+';
+                  } else {
+                     // standard segments
+                     $regex = '[^' . $this->quoted_separators . ']+';
+                  }
+                  
+                  $segments[] = '(?<' . $key . '>' . $regex . ')';
+                  $this->names[] = $key;
+                  $i += strlen($key);
+               } else {
+                  // invalid identifier:
+                  $literal .= $curr;
+               }
+            } else {
+               // just normal text
+               $literal .= $curr;
             }
-            
-            $t_offset = $offset + strlen($key);
          }
-   
-         $t_regex .= $this->quote(substr($path, $t_offset), '/');
-         $parsed = $t_regex;
-         
-      } else {
-         $parsed = $this->quote($path);
       }
       
-      return $parsed;
+      if ($literal != '') {
+         $segments[] = $this->quote($literal);
+      }
+      
+      if ($balance != 0) {
+         throw new \InvalidArgumentException('Optional segment parenthesis are unbalanced.');
+      }
+      
+      return '/\A' . implode('', $segments) . '\Z/';
    }
    
+   /**
+    *
+    */
    protected function quote($string)
    {
       return preg_quote($string, '/');
