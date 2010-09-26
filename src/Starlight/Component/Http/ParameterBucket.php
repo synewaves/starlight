@@ -155,4 +155,4 @@ class ParameterBucket implements \ArrayAccess, \IteratorAggregate
    {
       return new \ArrayIterator($this->all());
    }
-};
+}

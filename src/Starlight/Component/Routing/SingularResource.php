@@ -30,4 +30,4 @@ class SingularResource extends Resource
       'delete'  => array('name' => 'delete_%s', 'verb' => 'get',    'url' => '/:action'),
       'destroy' => array('name' => '%s',        'verb' => 'delete', 'url' => '/'),
    );
-};
+}

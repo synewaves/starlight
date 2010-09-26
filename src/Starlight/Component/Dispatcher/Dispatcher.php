@@ -22,4 +22,4 @@ abstract class Dispatcher
    }
    
    abstract public function dispatch();
-};
+}

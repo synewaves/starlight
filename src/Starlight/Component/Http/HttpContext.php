@@ -23,4 +23,4 @@ class HttpContext extends Context
       $this->request = new Request();
       $this->response = new Response();
    }
-};
+}

@@ -364,4 +364,4 @@ class InflectorTest extends \PHPUnit_Framework_TestCase
          $this->assertEquals($lower_camel, Inflector::camelize($underscored, false));
       }
    }
-};
+}

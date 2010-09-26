@@ -16,4 +16,5 @@ use Starlight\Component\Routing\Route;
  */ 
 class RouteTest extends \PHPUnit_Framework_TestCase
 {
-};
+   
+}

@@ -189,4 +189,4 @@ class Resource implements Compilable
 
       return $routes;
    }
-};
+}

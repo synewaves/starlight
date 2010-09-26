@@ -141,4 +141,4 @@ class Route implements Routable, Compilable
    //    
    //    return $path;
    // }
-};
+}

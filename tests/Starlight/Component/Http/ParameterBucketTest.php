@@ -121,4 +121,4 @@ class ParameterBucketTest extends \PHPUnit_Framework_TestCase
    {
       return new ParameterBucket($this->params);
    }
-};
+}

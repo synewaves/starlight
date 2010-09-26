@@ -295,4 +295,4 @@ class RequestTest extends \PHPUnit_Framework_TestCase
    {
       return new Request($this->post, $this->get, $this->cookies, $this->files, $this->server);
    }
-};
+}

@@ -18,4 +18,4 @@ class HttpDispatcher extends Dispatcher
    {
       dump($this->context->request);
    }
-};
+}

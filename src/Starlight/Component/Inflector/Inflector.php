@@ -305,7 +305,7 @@ class Inflector
    {
       return static::underscore($str) . ($underscore ? '_id' : 'id');
    }
-};
+}
 
 
 // include default inflections

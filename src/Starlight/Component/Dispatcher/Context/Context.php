@@ -13,4 +13,4 @@ namespace Starlight\Component\Dispatcher\Context;
 
 class Context
 {
-};
+}

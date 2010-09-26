@@ -95,4 +95,4 @@ class Response
       
       return $this;
    }
-};
+}

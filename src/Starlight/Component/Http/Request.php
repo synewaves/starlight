@@ -312,4 +312,4 @@ class Request
 
       return $headers;
    }
-};
+}

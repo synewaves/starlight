@@ -17,4 +17,4 @@ namespace Starlight\Component\Http\Exception;
  */
 class IpSpoofingException extends \Exception
 {
-};
+}

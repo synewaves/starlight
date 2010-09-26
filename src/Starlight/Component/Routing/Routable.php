@@ -18,4 +18,4 @@ use Starlight\Component\Http\Request;
 interface Routable
 {
    public function match(Request $request);
-};
+}

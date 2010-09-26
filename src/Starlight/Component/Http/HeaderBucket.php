@@ -329,4 +329,4 @@ class HeaderBucket implements \ArrayAccess, \IteratorAggregate
    {
       return strtr(strtolower($key), '_', '-');
    }
-};
+}
