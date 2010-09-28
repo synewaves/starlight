@@ -13,7 +13,6 @@ use Starlight\Component\Routing\RouteParser;
 
 
 /**
- * @group Routing
  */ 
 class RouteParserTest extends \PHPUnit_Framework_TestCase
 {
