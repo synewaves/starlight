@@ -27,3 +27,14 @@ function dump()
       echo '<hr />';
    }
 }
+
+
+$r = new \Starlight\Component\Routing\Router();
+$r->draw(function($r){
+
+   $r->map('users', $r->redirect('/users/anything'));
+   
+})->compile();
+
+echo $r;
+dump($r);

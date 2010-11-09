@@ -51,6 +51,11 @@ class Router implements Compilable
          throw new \RuntimeException('Cannot use ' . __CLASS__ . '::map within a resource context.');
       }
       
+      if (!preg_match('/\(\.:format\)$/', $path)) {
+         // auto append format option to path:
+         $path .= '(.:format)';
+      }
+      
       $this->routes[] = new Route($path, $endpoint);
       $this->current[] = count($this->routes) - 1;
       $this->current_type = 'route';
@@ -119,6 +124,19 @@ class Router implements Compilable
    }
    
    /**
+    *
+    */
+   public function redirect($path)
+   {
+      // TOOD: handle inline redirection
+      if (is_string($path)) {
+         return function() {
+            
+         };
+      }
+   }
+   
+   /**
     * Scope routes
     * @param array $scopes scopes to apply
     * @param \Closure $callback callback
@@ -181,7 +199,7 @@ class Router implements Compilable
             'name' => $r->name,
             'verb' => strtoupper(implode(',', $r->methods)),
             'path' => $r->path,
-            'endp' => $r->endpoint,
+            'endp' => is_callable($r->endpoint) ? '{callback}' : $r->endpoint,
          );
          
          if (strlen($p['name']) > $mn) {
