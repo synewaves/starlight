@@ -12,7 +12,7 @@ namespace Starlight\Component\Routing;
 
 
 /**
- * Route
+ * RouteParser
  */
 class RouteParser
 {
@@ -22,7 +22,6 @@ class RouteParser
     * @var string
     */
    protected static $default_separators = array('/', '.');
-   
    public $path;
    public $regex;
    public $requirements;
@@ -32,7 +31,11 @@ class RouteParser
    
    
    /**
-    *
+    * Parse a route path into a regular expression
+    * @param string $path original url path
+    * @param array $requirements requirements hash
+    * @param array $separators path separators
+    * @return string regular expression
     */
    public function parse($path, array $requirements = array(), array $separators = array())
    {
@@ -48,7 +51,8 @@ class RouteParser
    }
    
    /**
-    *
+    * Reduce the path into the regular expression
+    * @return string reduced path
     */
    protected function reduce()
    {
@@ -136,7 +140,9 @@ class RouteParser
    }
    
    /**
-    *
+    * Quote string for preg parsing
+    * @param string $string string to quote
+    * @return string quoted string
     */
    protected function quote($string)
    {

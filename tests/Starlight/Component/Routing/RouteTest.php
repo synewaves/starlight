@@ -18,7 +18,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
 {
    public function testRouteIsNormalized()
    {
-      $route = new Route('some/path', 'controller#action');
+      $route = new Route('some/path', 'controller::action');
       $this->assertEquals('/some/path', $route->path);
    }
    
@@ -80,7 +80,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
    
    public function testDetermineControllerActionFromEndpoint()
    {
-      $route = $this->getRoute(array('endpoint' => 'users#view'));
+      $route = $this->getRoute(array('endpoint' => 'users::view'));
       $route->compile();
       
       $this->assertEquals('users', $route->parameters['controller']);
@@ -91,7 +91,7 @@ class RouteTest extends \PHPUnit_Framework_TestCase
    {
       $defaults = array(
          'path' => '/:controller/:action/:id',
-         'endpoint' => 'controller#action',
+         'endpoint' => 'controller::action',
       );
       $options = array_merge($defaults, $options);
       

@@ -31,10 +31,13 @@ class Route implements Routable, Compilable
    public $path;
    public $endpoint;
    public $regex;
-   public $parameters;
+   public $parameters = array();
    public $constraints;
-   public $methods;
+   public $methods = array();
    public $name;
+   public $module;
+   public $path_prefix;
+   public $name_prefix;
    
    
    /**
@@ -51,12 +54,12 @@ class Route implements Routable, Compilable
    /**
     * Set route parameter defaults
     * @param array $defaults default values hash
-    * @return Route this instance
+    * @return \Starlight\Component\Routing\Route this instance
     */
    public function defaults(array $defaults)
    {
       foreach ($defaults as $key => $value) {
-         if (trim($this->parameters[$key]) == '') {
+         if (!isset($this->parameters[$key]) || trim($this->parameters[$key]) == '') {
             $this->parameters[$key] = $value;
          }
       }
@@ -65,9 +68,9 @@ class Route implements Routable, Compilable
    }
    
    /**
-   * Set route constraints
-   * @param mixed $constraints constraints (hash or Closure)
-   * @return Route this instance
+    * Set route constraints
+    * @param mixed $constraints constraints (hash or \Closure)
+    * @return \Starlight\Component\Routing\Route this instance
     */
    public function constraints($constraints)
    {
@@ -77,21 +80,25 @@ class Route implements Routable, Compilable
    }
    
    /**
-   * Set HTTP methods/verbs route should respond to
-   * @param array $methods HTTP methods
-   * @return Route this instance
+    * Set HTTP methods/verbs route should respond to
+    * @param array $methods HTTP methods
+    * @return \Starlight\Component\Routing\Route this instance
     */
-   public function methods(array $methods)
+   public function methods($methods)
    {
+      if (!is_array($methods)) {
+         $methods = array($methods);
+      }
+      
       $this->methods = $methods;
       
       return $this;
    }
    
    /**
-   * Set route name for generated helpers
-   * @param string $name route name
-   * @return Route this instance
+    * Set route name for generated helpers
+    * @param string $name route name
+    * @return \Starlight\Component\Routing\Route this instance
     */
    public function name($name)
    {
@@ -101,26 +108,54 @@ class Route implements Routable, Compilable
    }
    
    /**
+    * Set module/namespace for the controller
+    * @param string $module module/namespace
+    * @return \Starlight\Component\Routing\Route this instance
+    */
+   public function module($module)
+   {
+      $this->module = $module;
+      
+      return $this;
+   }
+   
+   /**
     * Compiles the route
+    * @return \Starlight\Component\Routing\Route this compiled instance
     */
    public function compile()
    {
       $parser = new RouteParser();
       $constraints = !is_callable($this->constraints) ? (array) $this->constraints : array();
 
+      if ($this->path_prefix) {
+         $this->path = $this->path_prefix . $this->path;
+      }
+
       $this->regex = $parser->parse($this->path, $constraints);
       $this->parameters = array_merge(static::$base_parameter_defaults, array_fill_keys($parser->names, ''), (array) $this->parameters);
       
-      // get endpoint:
-      if (strpos($this->endpoint, '#') !== false) {
-         list($this->parameters['controller'], $this->parameters['action']) = explode('#', $this->endpoint);
+      // get endpoint if string:
+      if (is_string($this->endpoint) && strpos($this->endpoint, '::') !== false) {
+         // apply module:
+         if ($this->module) {
+            $this->endpoint = $this->module . '\\' . $this->endpoint;
+         }
+         
+         list($this->parameters['controller'], $this->parameters['action']) = explode('::', $this->endpoint);
+      }
+      
+      // set name/prefix if available:
+      if ($this->name && $this->name_prefix) {
+         $this->name = $this->name_prefix . $this->name;
       }
 
       return $this;
    }
    
    /**
-    *
+    * Match a request
+    * @param \Starlight\Component\Http\Request $request current request
     */
    public function match(Request $request)
    {
@@ -137,5 +172,14 @@ class Route implements Routable, Compilable
       $path = '/' . $path;
       
       return $path;
+   }
+   
+   /**
+    * Nice output version for this route
+    * @return string nice output
+    */
+   public function __toString()
+   {
+      return sprintf("%-6s %-40s %s", strtoupper(implode(',', $this->methods)), $this->path, json_encode($this->parameters));
    }
 }

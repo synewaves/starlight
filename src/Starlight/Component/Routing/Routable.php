@@ -13,9 +13,13 @@ use Starlight\Component\Http\Request;
 
 
 /**
- * Route
+ * Routable interface
  */
 interface Routable
 {
+   /**
+    * Match a request
+    * @param \Starlight\Component\Http\Request $request current request
+    */
    public function match(Request $request);
 }

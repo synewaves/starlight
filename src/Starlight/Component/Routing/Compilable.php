@@ -16,5 +16,8 @@ namespace Starlight\Component\Routing;
  */
 interface Compilable
 {
+   /**
+    * Compile
+    */
    public function compile();
 }
