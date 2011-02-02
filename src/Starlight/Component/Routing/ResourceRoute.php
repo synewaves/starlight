@@ -15,7 +15,7 @@ use Starlight\Component\Inflector\Inflector;
 /**
  * ResourceRoute
  */
-class ResourceRoute implements Compilable
+class ResourceRoute implements CompilableInterface
 {
    /**
     * RESTful routing map; maps actions to methods

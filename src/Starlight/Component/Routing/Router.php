@@ -16,7 +16,7 @@ use Starlight\Component\Inflector\Inflector;
 /**
  * Router
  */
-class Router implements Compilable
+class Router implements CompilableInterface
 {
    protected $routes = array();
    protected $current = array();
@@ -130,9 +130,12 @@ class Router implements Compilable
    {
       // TOOD: handle inline redirection
       if (is_string($path)) {
-         return function() {
-            
+         return function() use ($path) {
+            return $path;
          };
+      } else {
+         // already a callback, need to lazy evaluate later:
+         return $path;
       }
    }
    

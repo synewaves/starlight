@@ -15,7 +15,7 @@ use Starlight\Component\Http\Request;
 /**
  * Routable interface
  */
-interface Routable
+interface RoutableInterface
 {
    /**
     * Match a request

@@ -9,17 +9,15 @@
  */
 
 namespace Starlight\Component\Routing;
-use Starlight\Component\Http\Request;
 
 
 /**
- * Routable interface
+ * Compilable interface
  */
-interface Routable
+interface CompilableInterface
 {
    /**
-    * Match a request
-    * @param \Starlight\Component\Http\Request $request current request
+    * Compile
     */
-   public function match(Request $request);
+   public function compile();
 }

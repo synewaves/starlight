@@ -15,7 +15,7 @@ use Starlight\Component\Http\Request;
 /**
  * Route
  */
-class Route implements Routable, Compilable
+class Route implements RoutableInterface, CompilableInterface
 {
    /**
     * Base default values for route parameters
@@ -43,7 +43,7 @@ class Route implements Routable, Compilable
    /**
     * Constructor
     * @param string $path url path
-    * @param mixed $endpoint route endpoint
+    * @param mixed $endpoint route endpoint - "controller::action" or a valid callback
     */
    public function __construct($path, $endpoint)
    {
@@ -136,13 +136,18 @@ class Route implements Routable, Compilable
       $this->parameters = array_merge(static::$base_parameter_defaults, array_fill_keys($parser->names, ''), (array) $this->parameters);
       
       // get endpoint if string:
-      if (is_string($this->endpoint) && strpos($this->endpoint, '::') !== false) {
-         // apply module:
-         if ($this->module) {
-            $this->endpoint = $this->module . '\\' . $this->endpoint;
+      if (is_string($this->endpoint)) {
+         if (strpos($this->endpoint, '::') !== false) {
+            // apply module:
+            if ($this->module) {
+               $this->endpoint = $this->module . '\\' . $this->endpoint;
+            }
+            
+            list($this->parameters['controller'], $this->parameters['action']) = explode('::', $this->endpoint);
          }
-         
-         list($this->parameters['controller'], $this->parameters['action']) = explode('::', $this->endpoint);
+      } else {
+         // should be a callback
+         // TODO: handle callbacks
       }
       
       // set name/prefix if available:
@@ -172,14 +177,5 @@ class Route implements Routable, Compilable
       $path = '/' . $path;
       
       return $path;
-   }
-   
-   /**
-    * Nice output version for this route
-    * @return string nice output
-    */
-   public function __toString()
-   {
-      return sprintf("%-6s %-40s %s", strtoupper(implode(',', $this->methods)), $this->path, json_encode($this->parameters));
    }
 }

@@ -162,20 +162,6 @@ class HeaderBucket implements \ArrayAccess, \IteratorAggregate
       
       return $this;
    }
-
-   // /**
-   // * Returns an instance able to manage the Cache-Control header.
-   // *
-   // * @return CacheControl A CacheControl instance
-   // */
-   // public function getCacheControl()
-   // {
-   //    if (null === $this->cacheControl) {
-   //       $this->cacheControl = new CacheControl($this, $this->get('Cache-Control'), $this->type);
-   //    }
-   // 
-   //    return $this->cacheControl;
-   // }
    
    /**
     * Set cookie variable
@@ -287,9 +273,9 @@ class HeaderBucket implements \ArrayAccess, \IteratorAggregate
       return $this;
    }
    
-   //
+   // -----------
    // ArrayAccess
-   //
+   // -----------
    
    public function offsetExists($offset)
    {
@@ -311,9 +297,9 @@ class HeaderBucket implements \ArrayAccess, \IteratorAggregate
       return $this->delete($offset);
    }
    
-   //
+   // -----------------
    // IteratorAggregate
-   //
+   // -----------------
    
    public function getIterator()
    {
