@@ -22,11 +22,6 @@ class HeaderBucket implements \ArrayAccess, \IteratorAggregate
     */
    protected $headers;
    
-   // /**
-   //  * Wrapper class for request/response headers
-   //  */
-   // protected $cache_control;
-   
    /**
     * Type (request, response)
     * @var string

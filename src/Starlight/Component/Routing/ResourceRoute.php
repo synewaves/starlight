@@ -65,7 +65,7 @@ class ResourceRoute implements CompilableInterface
     */
    public function __construct($resource = null, array $options = array())
    {
-      if (!is_null($resource)) {
+      if ($resource !== null) {
          $this->resource = $resource;
          
          $this->controller = $this->plural = Inflector::pluralize($this->resource);
