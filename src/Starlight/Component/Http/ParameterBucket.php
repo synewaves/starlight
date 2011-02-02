@@ -9,150 +9,56 @@
  */
 
 namespace Starlight\Component\Http;
+use Starlight\Component\StdLib\StorageBucket;
 
 
 /**
  * Wrapper class request parameters
  * @see Request
  */
-class ParameterBucket implements \ArrayAccess, \IteratorAggregate
+class ParameterBucket extends StorageBucket
 {
    /**
-    * Parameters
-    * @var array
+    * Returns the alphabetic characters of the parameter value
+    * @param string $key The parameter key
+    * @param mixed $default The default value
+    * @return string The filtered value
     */
-   protected $parameters;
-   
-   
-   /**
-    * Constructor
-    * @param array $parameters Parameters
-    */
-   public function __construct(array $parameters = array())
+   public function getAlpha($key, $default = '')
    {
-      $this->replace($parameters);
+      return preg_replace('/[^[:alpha:]]/', '', $this->get($key, $default));
    }
    
    /**
-    * Returns the parameters
-    * @return array Parameters
+    * Returns the alphabetic characters and digits of the parameter value
+    * @param string $key The parameter key
+    * @param mixed $default The default value
+    * @return string The filtered value
     */
-   public function all()
+   public function getAlnum($key, $default = '')
    {
-      return $this->parameters;
+      return preg_replace('/[^[:alnum:]]/', '', $this->get($key, $default));
    }
    
    /**
-    * Returns the parameter keys
-    * @return array Parameter keys
+    * Returns the digits of the parameter value
+    * @param string $key The parameter key
+    * @param mixed $default The default value
+    * @return string The filtered value
     */
-   public function keys()
+   public function getDigits($key, $default = '')
    {
-      return array_keys($this->parameters);
+      return preg_replace('/[^[:digit:]]/', '', $this->get($key, $default));
    }
    
    /**
-    * Replaces the current parameters by a new set
-    * @param array $parameters parameters
-    * @return HeaderBucket this instance
+    * Returns the parameter value converted to integer
+    * @param string $key The parameter key
+    * @param mixed $default The default value
+    * @return string The filtered value
     */
-   public function replace(array $parameters = array())
+   public function getInt($key, $default = 0)
    {
-      $this->parameters = $parameters;
-      
-      return $this;
-   }
-   
-   /**
-    * Adds parameters
-    * @param array $parameters parameters
-    * @return HeaderBucket this instance
-    */
-   public function add(array $parameters = array())
-   {
-      $this->parameters = array_replace($this->parameters, $parameters);
-      
-      return $this;
-   }
-   
-   /**
-    * Returns a parameter by name
-    * @param string $key The key
-    * @param mixed $default default value
-    * @return mixed value
-    */
-   public function get($key, $default = null)
-   {
-      return array_key_exists($key, $this->parameters) ? $this->parameters[$key] : $default;
-   }
-   
-   /**
-    * Sets a parameter by name
-    * @param string $key The key
-    * @param mixed $value value
-    * @return HeaderBucket this instance
-    */
-   public function set($key, $value)
-   {
-      $this->parameters[$key] = $value;
-      
-      return $this;
-   }
-   
-   /**
-    * Returns true if the parameter is defined
-    * @param string $key The key
-    * @return boolean true if the parameter exists, false otherwise
-    */
-   public function has($key)
-   {
-      return array_key_exists($key, $this->parameters);
-   }
-   
-   /**
-    * Deletes a parameter
-    * @param string $key key
-    * @return HeaderBucket this instance
-    */
-   public function delete($key)
-   {
-      if ($this->has($key)) {
-         unset($this->parameters[$key]);
-      }
-      
-      return $this;
-   }
-   
-   //
-   // ArrayAccess
-   //
-   
-   public function offsetExists($offset)
-   {
-      return $this->has($offset);
-   }
-   
-   public function offsetGet($offset)
-   {
-      return $this->get($offset);
-   }
-   
-   public function offsetSet($offset, $value)
-   {
-      return $this->set($offset, $value);
-   }
-   
-   public function offsetUnset($offset)
-   {
-      return $this->delete($offset);
-   }
-   
-   //
-   // IteratorAggregate
-   //
-   
-   public function getIterator()
-   {
-      return new \ArrayIterator($this->all());
+      return (int) $this->get($key, $default);
    }
 }

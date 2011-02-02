@@ -22,99 +22,42 @@ class ParameterBucketTest extends \PHPUnit_Framework_TestCase
          'test_1' => 'value_1',
          'test_2' => 'value_2',
          'test_3' => 'value_3',
+         'test_4' => 12321,
+         'test_5' => '12341',
+         'test_6' => 'value_1matt23_again',
       );
    }
    
-   public function testAll()
+   public function testGetAlpha()
    {
-      $this->assertEquals($this->getBucket()->all(), $this->params);
+      $this->assertEquals($this->getBucket()->getAlpha('test_1'), 'value');
+      $this->assertEquals($this->getBucket()->getAlpha('test_4'), '');
+      $this->assertEquals($this->getBucket()->getAlpha('test_5'), '');
+      $this->assertEquals($this->getBucket()->getAlpha('test_6'), 'valuemattagain');
    }
    
-   public function testKeys()
+   public function testGetAlnum()
    {
-      $this->assertEquals($this->getBucket()->keys(), array_keys($this->params));
+      $this->assertEquals($this->getBucket()->getAlnum('test_1'), 'value1');
+      $this->assertEquals($this->getBucket()->getAlnum('test_4'), '12321');
+      $this->assertEquals($this->getBucket()->getAlnum('test_5'), '12341');
+      $this->assertEquals($this->getBucket()->getAlnum('test_6'), 'value1matt23again');
    }
    
-   public function testReplace()
+   public function testGetDigits()
    {
-      $bucket = $this->getBucket();
-      $new_parameters = array('test_4' => 'value_4');
-      $bucket->replace($new_parameters);
-      
-      $this->assertEquals($bucket->all(), $new_parameters);
-      $this->assertNotEquals($bucket->all(), $this->params);
+      $this->assertEquals($this->getBucket()->getDigits('test_1'), '1');
+      $this->assertEquals($this->getBucket()->getDigits('test_4'), '12321');
+      $this->assertEquals($this->getBucket()->getDigits('test_5'), '12341');
+      $this->assertEquals($this->getBucket()->getDigits('test_6'), '123');
    }
    
-   public function testAdd()
+   public function testGetInt()
    {
-      $bucket = $this->getBucket();
-      $new_parameters = array('test_4' => 'value_4');
-      $bucket->add($new_parameters);
-      
-      $this->assertEquals($bucket->all(), array_replace($this->params, $new_parameters));
-      $this->assertNotEquals($bucket->all(), $this->params);
-   }
-   
-   public function testGet()
-   {
-      $this->assertEquals($this->getBucket()->get('test_1'), 'value_1');
-      $this->assertNull($this->getBucket()->get('test_4'));
-      $this->assertEquals($this->getBucket()->get('test_4', 'value_4'), 'value_4');
-   }
-   
-   public function testSet()
-   {
-      $bucket = $this->getBucket();
-      
-      $this->assertNull($bucket->get('test_4'));
-      $bucket->set('test_4', 'value_4');
-      $this->assertEquals($bucket->get('test_4'), 'value_4');
-      
-      $this->assertEquals($bucket->get('test_2'), 'value_2');
-      $bucket->set('test_2', 'value_22');
-      $this->assertEquals($bucket->get('test_2'), 'value_22');
-   }
-   
-   public function testHas()
-   {
-      $this->assertTrue($this->getBucket()->has('test_1'));
-      $this->assertFalse($this->getBucket()->has('test_4'));
-   }
-   
-   public function testDelete()
-   {
-      $bucket = $this->getBucket();
-      
-      $this->assertTrue($bucket->has('test_1'));
-      $bucket->delete('test_1');
-      $this->assertFalse($bucket->has('test_1'));
-      
-      $this->assertFalse($bucket->has('test_4'));
-      $bucket->delete('test_4');
-      $this->assertFalse($bucket->has('test_4'));
-   }
-   
-   public function testArrayAccess()
-   {
-      $bucket = $this->getBucket();
-      
-      $this->assertTrue(isset($bucket['test_1']));
-      $this->assertEquals($bucket['test_1'], 'value_1');
-      
-      $bucket['test_4'] = 'anything';
-      $this->assertTrue(isset($bucket['test_4']));
-      
-      unset($bucket['test_4']);
-      $this->assertFalse(isset($bucket['test_4']));
-   }
-   
-   public function testIteratorAggreate()
-   {
-      $bucket = $this->getBucket();
-      
-      foreach ($bucket as $key => $value) {
-         $this->assertEquals($value, $this->params[$key]);
-      }
+      $this->assertEquals($this->getBucket()->getInt('test_1'), 0);
+      $this->assertEquals($this->getBucket()->getInt('test_4'), 12321);
+      $this->assertEquals($this->getBucket()->getInt('test_5'), 12341);
+      $this->assertEquals($this->getBucket()->getInt('test_6'), 0);
    }
    
    protected function getBucket()
