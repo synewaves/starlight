@@ -142,13 +142,19 @@ class RouteParserTest extends \PHPUnit_Framework_TestCase
    
    public function testThrowsExceptionIfOptionalSegmentParenthesisAreUnbalancedFront()
    {
-      $this->setExpectedException('InvalidArgumentException');
-      $this->parser->parse('/foo((/bar)');
+      try {
+         $this->parser->parse('/foo((/bar)');
+      } catch (\Exception $e) {
+         $this->assertInstanceOf('InvalidArgumentException', $e);
+      }
    }
    
    public function testThrowsExceptionIfOptionalSegmentParenthesisAreUnbalancedBack()
    {  
-      $this->setExpectedException('InvalidArgumentException');
-      $this->parser->parse('/foo(/bar))');
+      try {
+         $this->parser->parse('/foo(/bar))');
+      } catch (\Exception $e) {
+         $this->assertInstanceOf('InvalidArgumentException', $e);
+      }
    }
 }

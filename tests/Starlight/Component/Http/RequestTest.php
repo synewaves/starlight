@@ -218,8 +218,11 @@ class RequestTest extends \PHPUnit_Framework_TestCase
       $this->server['HTTP_CLIENT_IP'] = '127.0.0.2';
       $this->server['HTTP_X_FORWARDED_FOR'] = '127.0.0.1, 192.168.0.1, 192.168.0.2';
       
-      $this->setExpectedException('Starlight\\Component\\Http\\Exception\\IpSpoofingException');
-      $this->getRequest()->getRemoteIp();
+      try {
+         $this->getRequest()->getRemoteIp();
+      } catch (\Exception $e) {
+         $this->assertInstanceOf('Starlight\\Component\\Http\\Exception\\IpSpoofingException', $e);
+      }
    }
    
    public function testIsXmlHttpRequest()

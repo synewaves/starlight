@@ -71,7 +71,6 @@ class Cookie
     */
    public function setName($name)
    {
-      // from PHP source code
       if (preg_match("/[=,; \t\r\n\013\014]/", $name)) {
          throw new \InvalidArgumentException(sprintf('The cookie name "%s" contains invalid characters.', $name));
       }
@@ -102,7 +101,7 @@ class Cookie
    public function setValue($value)
    {
       if (preg_match("/[,; \t\r\n\013\014]/", $value)) {
-         throw new \InvalidArgumentException(sprintf('The cookie value "%s" contains invalid characters.', $name));
+         throw new \InvalidArgumentException(sprintf('The cookie value "%s" contains invalid characters.', $value));
       }
       
       $this->value = $value;
@@ -115,7 +114,7 @@ class Cookie
     */
    public function getExpires()
    {
-      return $this->options['expire'];
+      return $this->options['expires'];
    }
    
    /**
@@ -126,13 +125,12 @@ class Cookie
    public function setExpires($expires)
    {
       if (is_numeric($expires)) {
-         $expires = (int) $expires;
-      } elseif ($expires instanceof \DateTime) {
-         $expires = $expires->getTimestamp();
-      } else {
+         $expires = \DateTime::createFromFormat('U', $expires);
+      } elseif (!($expires instanceof \DateTime)) {
          $o_expires = $expires;
-         $expires = strtotime($expires);
-         if ($expires === false || $expires == -1) {
+         try {
+            $expires = new \DateTime($expires);
+         } catch (\Exception $e) {
             throw new \InvalidArgumentException(sprintf('The "expires" cookie parameter is not valid: "%s".', $o_expires));
          }
       }
@@ -227,7 +225,38 @@ class Cookie
     */
    public function isCleared()
    {
-      return $this->options['expires'] < time();
+      return $this->options['expires'] < new \DateTime();
+   }
+   
+   /**
+    * Get formatted cookie header value
+    * @return string formatted value
+    */
+   public function toHeaderValue()
+   {
+      $cookie = sprintf('%s=%s', $this->name, urlencode($this->value));
+      
+      if ($this->options['expires'] !== null) {
+         $cookie .= '; expires=' . $this->options['expires']->format(DATE_COOKIE);
+      }
+      
+      if ($this->options['domain']) {
+         $cookie .= '; domain=' . $this->options['domain'];
+      }
+      
+      if ($this->options['path'] && $this->options['path'] !== '/') {
+         $cookie .= '; path=' . $this->options['path'];
+      }
+      
+      if ($this->options['secure']) {
+         $cookie .= '; secure';
+      }
+      
+      if ($this->options['http_only']) {
+         $cookie .= '; httponly';
+      }
+      
+      return $cookie;
    }
    
    /**
@@ -236,29 +265,6 @@ class Cookie
     */
    public function __toString()
    {
-      $cookie = sprintf('%s=%s', $this->name, urlencode($this->value));
-      
-      if ($options['expires'] !== null) {
-         $date = \DateTime::createFromFormat('U', $options['expires'], new \DateTimeZone('UTC'));
-         $cookie .= '; expires=' . substr($date->format('D, d-M-Y H:i:s T'), 0, -5);
-      }
-      
-      if ($options['domain']) {
-         $cookie .= '; domain=' . $options['domain'];
-      }
-      
-      if ($options['path'] && $options['path'] !== '/') {
-         $cookie .= '; path=' . $options['path'];
-      }
-      
-      if ($options['secure']) {
-         $cookie .= '; secure';
-      }
-      
-      if ($options['http_only']) {
-         $cookie .= '; httponly';
-      }
-      
-      return $cookie;
+      return $this->toHeaderValue();
    }
 }
