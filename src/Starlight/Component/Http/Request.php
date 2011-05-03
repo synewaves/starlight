@@ -15,7 +15,7 @@ namespace Starlight\Component\Http;
  */
 class Request
 {
-   public static $local_ips = array('127.0.0.1');
+   public static $local_ips = array('127.0.0.1', '::1');
    
    public $post;
    public $get;
@@ -281,6 +281,21 @@ class Request
    {
       $url = $this->server->get('REQUEST_URI');
       return trim($url) != '' ? $url : '/';
+   }
+   
+   /**
+    * Gets the requested URI path without query string information
+    * @return string uri
+    */
+   public function getBaseUri()
+   {
+      $url = $this->getUri();
+
+      if (trim($this->server->get('QUERY_STRING')) != '') {
+         $url = substr($url, 0, strpos($url, '?'));
+      }
+      
+      return $url;
    }
    
    /**

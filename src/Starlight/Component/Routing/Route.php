@@ -126,14 +126,25 @@ class Route implements RoutableInterface, CompilableInterface
    public function compile()
    {
       $parser = new RouteParser();
-      $constraints = !is_callable($this->constraints) ? (array) $this->constraints : array();
+      
+      $regex_constraints = $other_constraints = array();
+      if (is_array($this->constraints)) {
+         foreach ($this->constraints as $k => $c) {
+            if (!is_callable($c)) {
+               $regex_constraints[$k] = $c;
+            } else {
+               $other_constraints[] = $c;
+            }
+         }   
+      }
 
       if ($this->path_prefix) {
          $this->path = $this->path_prefix . $this->path;
       }
 
-      $this->regex = $parser->parse($this->path, $constraints);
+      $this->regex = $parser->parse($this->path, $regex_constraints);
       $this->parameters = array_merge(static::$base_parameter_defaults, array_fill_keys($parser->names, ''), (array) $this->parameters);
+      $this->constraints = $other_constraints;
       
       // get endpoint if string:
       if (is_string($this->endpoint)) {
@@ -145,9 +156,9 @@ class Route implements RoutableInterface, CompilableInterface
             
             list($this->parameters['controller'], $this->parameters['action']) = explode('::', $this->endpoint);
          }
-      } else {
+      } elseif (!is_callable($this->endpoint)) {
          // should be a callback
-         // TODO: handle callbacks
+         throw new \InvalidArgumentException('Route endpoint is invalid');
       }
       
       // set name/prefix if available:
@@ -161,9 +172,47 @@ class Route implements RoutableInterface, CompilableInterface
    /**
     * Match a request
     * @param \Starlight\Component\Http\Request $request current request
+    * @return boolean route matches request
     */
    public function match(Request $request)
+   {      
+      $is_match = preg_match($this->regex, $request->getBaseUri(), $matches);
+      if ($is_match) {
+         if (!in_array($request->getMethod(), $this->methods)) {
+            return false;
+         }
+         
+         foreach ($this->constraints as $c) {
+            if (!call_user_func($c, $request)) {
+               return false;
+            }
+         }
+         
+         foreach ($matches as $k => $v) {
+            if (array_key_exists($k, $this->parameters)) {
+               $this->parameters[$k] = $v;
+            }
+         }
+      }
+      
+      return $is_match;
+   }
+   
+   /**
+    *
+    */
+   public function dispatch(Request $request)
    {
+      $p = array_filter($this->parameters, function($var){ return trim($var) != ''; });
+      unset($p['controller'], $p['action']);
+      
+      if (is_callable($this->endpoint)) {
+         call_user_func_array($this->endpoint, array_merge(array($request), array_values($p)));
+         return true;
+      } else {
+         // controller pattern
+         
+      }
    }
    
    /**

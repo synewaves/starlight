@@ -174,20 +174,27 @@ class Router implements CompilableInterface
       $this->has_compiled = true;
    }
    
-   // /**
-   //  *
-   //  */
-   // public function match(Request $request)
-   // {
-   //    foreach ($this->compiled as $r) {
-   //       if ($r->match($request)) {
-   //          //
-   //          return;
-   //       }
-   //    }
-   //    
-   //    // nothing matched:
-   // }
+   /**
+    *
+    */
+   public function match(Request $request)
+   {
+      foreach ($this->compiled as $r) {
+         if ($r->match($request)) {
+            return $r;
+         }
+      }
+      
+      // nothing matched:
+   }
+   
+   /**
+    *
+    */
+   public function dispatch(Route $endpoint, Request $request)
+   {
+      return $endpoint->dispatch($request);
+   }
    
    /**
     * Pretty version of routes
@@ -258,7 +265,7 @@ class Router implements CompilableInterface
       if (isset($this->scopes['constraints'])) {
          $constraints = array();
          foreach ($this->scopes['constraints'] as $c) {
-            $constraints = array_merge($constraints, $c);
+            $constraints = array_merge($constraints, is_array($c) ? $c : (array) $c);
          }
          $route->constraints($constraints);
       }
