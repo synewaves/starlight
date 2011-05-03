@@ -4,8 +4,8 @@
  *
  * (c) Matthew Vince <matthew.vince@phaseshiftllc.com>
  *
- * This source file is subject to the MIT license that is bundled
- * with this source code in the file LICENSE.
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Starlight\Component\Routing;
@@ -178,7 +178,7 @@ class Route implements RoutableInterface, CompilableInterface
    {      
       $is_match = preg_match($this->regex, $request->getBaseUri(), $matches);
       if ($is_match) {
-         if (!in_array($request->getMethod(), $this->methods)) {
+         if (count($this->methods) > 0 && !in_array($request->getMethod(), $this->methods)) {
             return false;
          }
          
@@ -196,23 +196,6 @@ class Route implements RoutableInterface, CompilableInterface
       }
       
       return $is_match;
-   }
-   
-   /**
-    *
-    */
-   public function dispatch(Request $request)
-   {
-      $p = array_filter($this->parameters, function($var){ return trim($var) != ''; });
-      unset($p['controller'], $p['action']);
-      
-      if (is_callable($this->endpoint)) {
-         call_user_func_array($this->endpoint, array_merge(array($request), array_values($p)));
-         return true;
-      } else {
-         // controller pattern
-         
-      }
    }
    
    /**
