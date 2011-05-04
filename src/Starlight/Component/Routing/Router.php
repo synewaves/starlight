@@ -31,8 +31,10 @@ class Router implements CompilableInterface
     * @param \Closure $callback callback
     * @return \Starlight\Component\Routing\Router this instance
     */
-   public function draw(\Closure $callback)
+   public function draw($ns, \Closure $callback)
    {
+      $this->ns = $ns;
+      
       // TODO: check for cached version before redrawing these
       $callback($this);
       
@@ -42,13 +44,13 @@ class Router implements CompilableInterface
    /**
     * Maps a single route
     * @param string $path url path
-    * @param mixed $endpoint controller::action pair or callback
+    * @param mixed $endpoint controller#action pair or callback
     * @return \Starlight\Component\Routing\Route route
     */
    public function map($path, $endpoint)
    {
       if ($this->current_type == 'resource') {
-         throw new \RuntimeException('Cannot use ' . __CLASS__ . '::map within a resource context.');
+         throw new \RuntimeException('Cannot use ' . __CLASS__ . '::map within a resource context. Use member() or collection() instead.');
       }
       
       if (!preg_match('/\(\.:format\)$/', $path)) {
@@ -272,9 +274,19 @@ class Router implements CompilableInterface
          }
       }
       
-      // module
+      // module/class namespace
+      $module = '';
       if (isset($this->scopes['module'])) {
-         $route->module(implode('\\', $this->scopes['module']));
+         if (trim($this->ns) != '') {
+            $module .= $this->ns . '\\';
+         }
+         $module .= implode('\\', $this->scopes['module']);
+      } elseif (trim($this->ns) != '') {
+         $module .= $this->ns;
+      }
+      
+      if ($module != '') {
+         $route->module($module);
       }
       
       // path

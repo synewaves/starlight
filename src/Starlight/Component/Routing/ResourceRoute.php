@@ -68,8 +68,9 @@ class ResourceRoute implements CompilableInterface
       if ($resource !== null) {
          $this->resource = $resource;
          
-         $this->controller = $this->plural = Inflector::pluralize($this->resource);
-         $this->singular = Inflector::singularize($this->controller);
+         $this->plural = Inflector::pluralize($this->resource);
+         $this->singular = Inflector::singularize($this->resource);
+         $this->controller = Inflector::camelize($this->plural . '_controller');
       
          if (count($options) > 0) {
             foreach ($options as $key => $value) {
@@ -283,10 +284,6 @@ class ResourceRoute implements CompilableInterface
          $this->path_names = static::$resource_names;
       }
       
-      if ($this->module) {
-         $this->controller = $this->module . '\\' . $this->controller;
-      }
-      
       if (count($this->member) > 0) {
          foreach ($this->member as $member) {
             list($name, $verb) = $member;
@@ -308,8 +305,11 @@ class ResourceRoute implements CompilableInterface
             $path = str_replace(':action', $this->path_names[$action], $path);
          }
          
-         $r = new Route($this->path_prefix . '/' . $this->resource . $path, $this->controller . '::' . $action);
+         $r = new Route($this->path_prefix . '/' . $this->resource . $path, $this->controller . '#' . $action);
          $r->methods(array($parts['verb']));
+         if ($this->module) {
+            $r->module($this->module);
+         }
          
          $name = str_replace('%s', $this->name_prefix . $this->singular, $parts['name']);
          $name = str_replace('%p', $this->name_prefix . $this->plural, $name);

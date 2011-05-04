@@ -10,6 +10,7 @@
 
 namespace Starlight\Component\Routing;
 use Starlight\Component\Http\Request;
+use Starlight\Component\Inflector\Inflector;
 
 
 /**
@@ -17,17 +18,6 @@ use Starlight\Component\Http\Request;
  */
 class Route implements RoutableInterface, CompilableInterface
 {
-   /**
-    * Base default values for route parameters
-    * @var array
-    */
-   protected static $base_parameter_defaults = array(
-      'controller' => null,
-      'action' => null,
-      'id' => null,
-   );
-   
-   
    public $path;
    public $endpoint;
    public $regex;
@@ -43,7 +33,7 @@ class Route implements RoutableInterface, CompilableInterface
    /**
     * Constructor
     * @param string $path url path
-    * @param mixed $endpoint route endpoint - "controller::action" or a valid callback
+    * @param mixed $endpoint route endpoint - "controller#action" or a valid callback
     */
    public function __construct($path, $endpoint)
    {
@@ -143,18 +133,18 @@ class Route implements RoutableInterface, CompilableInterface
       }
 
       $this->regex = $parser->parse($this->path, $regex_constraints);
-      $this->parameters = array_merge(static::$base_parameter_defaults, array_fill_keys($parser->names, ''), (array) $this->parameters);
+      $this->parameters = array_merge(array_fill_keys($parser->names, ''), (array) $this->parameters);
       $this->constraints = $other_constraints;
       
       // get endpoint if string:
       if (is_string($this->endpoint)) {
-         if (strpos($this->endpoint, '::') !== false) {
+         if (strpos($this->endpoint, '#') !== false) {            
             // apply module:
             if ($this->module) {
                $this->endpoint = $this->module . '\\' . $this->endpoint;
             }
             
-            list($this->parameters['controller'], $this->parameters['action']) = explode('::', $this->endpoint);
+            list($this->parameters['controller'], $this->parameters['action']) = explode('#', $this->endpoint);
          }
       } elseif (!is_callable($this->endpoint)) {
          // should be a callback

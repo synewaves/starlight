@@ -21,7 +21,6 @@ class SingularResourceRoute extends ResourceRoute
     * @var array
     */
    protected static $resources_map = array(
-      'index'   => array('name' => '%s',        'verb' => 'get',    'url' => '(.:format)'),
       'add'     => array('name' => 'add_%s',    'verb' => 'get',    'url' => '/:action(.:format)'),
       'create'  => array('name' => '%s',        'verb' => 'post',   'url' => '(.:format)'),
       'show'    => array('name' => '%s',        'verb' => 'get',    'url' => '(.:format)'),

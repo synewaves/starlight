@@ -80,10 +80,10 @@ class RouteTest extends \PHPUnit_Framework_TestCase
    
    public function testDetermineControllerActionFromEndpoint()
    {
-      $route = $this->getRoute(array('endpoint' => 'users::view'));
+      $route = $this->getRoute(array('endpoint' => 'UsersController#view'));
       $route->compile();
       
-      $this->assertEquals('users', $route->parameters['controller']);
+      $this->assertEquals('UsersController', $route->parameters['controller']);
       $this->assertEquals('view', $route->parameters['action']);
    }
    
